@@ -1,0 +1,6 @@
+{
+  "explorer.compactFolders": false,
+  "files.associations": {
+    "solana_sdk.h": "c"
+  },
+}
