@@ -4,6 +4,7 @@
 #include <solana_sdk.h>
 
 uint64_t helloworld(SolParameters *params) {
+  sol_log_compute_units();
 
   if (params->ka_num < 1) {
     sol_log("Greeted account not included in the instruction");
