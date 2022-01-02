@@ -118,7 +118,7 @@ func (cli *Client) createSubAccountIfNotExist() error {
 			defaultCommitment,
 		)
 		if err != nil {
-			return fmt.Errorf("failed to GetMinimumBalanceForRentExemption, err: ", err)
+			return fmt.Errorf("failed to GetMinimumBalanceForRentExemption, err: %v", err)
 		}
 
 		// TODO: check payer balance
@@ -135,7 +135,7 @@ func (cli *Client) createSubAccountIfNotExist() error {
 			cli.payerAccount.PublicKey(),
 		).ValidateAndBuild()
 		if err != nil {
-			log.Fatalln("Failed building NewCreateAccountInstruction instruction", err)
+			return fmt.Errorf("failed building NewCreateAccountInstruction instruction, err: %v", err)
 		}
 
 		// Set transaction, sign, send, and confirm
@@ -149,7 +149,7 @@ func (cli *Client) createSubAccountIfNotExist() error {
 			solana.TransactionPayer(cli.payerAccount.PublicKey()),
 		)
 		if err != nil {
-			log.Fatalln("Failed to NewTransactionAndSignAndSendAndConfirm GetAccountInfo", err)
+			return fmt.Errorf("failed to NewTransactionAndSignAndSendAndConfirm GetAccountInfo, err: %v", err)
 		}
 
 		_ = transaction
@@ -179,7 +179,7 @@ func (cli *Client) SayHello() error {
 		solana.TransactionPayer(cli.payerAccount.PublicKey()),
 	)
 	if err != nil {
-		log.Fatalln("Failed to NewTransactionAndSignAndSendAndConfirm SayHello", err)
+		return fmt.Errorf("failed to NewTransactionAndSignAndSendAndConfirm SayHello, err: %v", err)
 	}
 
 	_ = transaction
@@ -188,7 +188,7 @@ func (cli *Client) SayHello() error {
 	return nil
 }
 
-func (cli *Client) ReportGreetings() error {
+func (cli *Client) ReportGreetings() (GreetingAccount, error) {
 	payerSubAccountInfo, err := cli.rpcClient.GetAccountInfoWithOpts(cli.ctx, cli.payerSubAccountPubKey, &rpc.GetAccountInfoOpts{Encoding: solana.EncodingBase64, Commitment: rpc.CommitmentConfirmed})
 	// payerSubAccountInfo, err := cli.rpcClient.GetAccountInfo(cli.ctx, cli.payerSubAccountPubKey)
 	if err != nil {
@@ -197,24 +197,5 @@ func (cli *Client) ReportGreetings() error {
 
 	var payerSubAccountInfoData GreetingAccount
 	bin.NewBorshDecoder(payerSubAccountInfo.Value.Data.GetBinary()).Decode(&payerSubAccountInfoData)
-	fmt.Println("-----> payerSubAccountInfoData", payerSubAccountInfoData)
-	return nil
+	return payerSubAccountInfoData, nil
 }
-
-// export async function reportGreetings(): Promise<void> {
-// 	const accountInfo = await connection.getAccountInfo(greetedPubkey);
-// 	if (accountInfo === null) {
-// 	  throw 'Error: cannot find the greeted account';
-// 	}
-// 	const greeting = borsh.deserialize(
-// 	  GreetingSchema,
-// 	  GreetingAccount,
-// 	  accountInfo.data,
-// 	);
-// 	console.log(
-// 	  greetedPubkey.toBase58(),
-// 	  'has been greeted',
-// 	  greeting.counter,
-// 	  'time(s)',
-// 	);
-//   }

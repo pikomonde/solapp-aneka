@@ -2,9 +2,7 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
-	"time"
 
 	"github.com/gagliardetto/solana-go"
 	clientAnekaHello "github.com/pikomonde/solapp-aneka/bpf/clients/aneka_hello"
@@ -20,7 +18,7 @@ func main() {
 	payerAcc, _ := solana.WalletFromPrivateKeyBase58(payerPrivateKey.String())
 
 	// Client
-	cliHellp, err := clientAnekaHello.InitClient(ctx, clientAnekaHello.ClientOption{
+	cliHello, err := clientAnekaHello.InitClient(ctx, clientAnekaHello.ClientOption{
 		PayerAccount: payerAcc,
 	})
 	if err != nil {
@@ -28,12 +26,17 @@ func main() {
 	}
 
 	// Say hello
-	now := time.Now()
-	cliHellp.SayHello()
-	fmt.Println(time.Since(now))
+	err = cliHello.SayHello()
+	if err != nil {
+		panic(err)
+	}
 
 	// Check how many has been greeted
-	cliHellp.ReportGreetings()
+	greetData, err := cliHello.ReportGreetings()
+	if err != nil {
+		panic(err)
+	}
 
+	log.Printf("Account %s greets %d times\n", payerAcc.PublicKey(), greetData.Counter)
 	log.Println("Success")
 }
